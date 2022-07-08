@@ -1,0 +1,137 @@
+{
+    "Version": "1.00",
+    "Sections": [
+	{
+            "Name": "GeneralSettings",
+            "Description": "Related To General Mod Settings",
+            "IsAdvanced": false,
+            "Keys": [
+				{
+                    "Options": [
+                        "HUD Text",
+                        "Message-Box Text"
+                    ],
+                    "Value": 0,
+                    "Name": "DisplayType",
+                    "Description": "In What Form You Want Text To Be Displayed.",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.MultipleChoiceKey"
+                },
+				{
+                    "Min": 0,
+                    "Max": 60,
+                    "Value": 0,
+                    "Name": "MinDisplayTime",
+                    "Description": "Minimum Seconds A Message Will Display For, 0 = Automatic.",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                },
+                {
+                    "Min": 0,
+                    "Max": 60,
+                    "Value": 0,
+                    "Name": "MaxDisplayTime",
+                    "Description": "Maximum Seconds A Message Will Display For, 0 = Automatic.",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                }
+            ],
+            "$version": "v1"
+        },
+        {
+            "Name": "FlavorTextFrequency",
+            "Description": "Related To How Frequently Flavor Text Should Show Up",
+            "IsAdvanced": false,
+            "Keys": [
+                {
+                    "Min": 0,
+                    "Max": 60,
+                    "Value": 2,
+                    "Name": "ShopCooldown",
+                    "Description": "Days Between Shop Messages Appearing, 0 = No Delay, 60 = 60 Day Cooldown.",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                },
+				{
+                    "Min": 0,
+                    "Max": 60,
+                    "Value": 2,
+                    "Name": "TavernCooldown",
+                    "Description": "Days Between Tavern Messages Appearing, 0 = No Delay, 60 = 60 Day Cooldown.",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                },
+				{
+                    "Min": 0,
+                    "Max": 60,
+                    "Value": 4,
+                    "Name": "TempleCooldown",
+                    "Description": "Days Between Temple Messages Appearing, 0 = No Delay, 60 = 60 Day Cooldown.",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                },
+				{
+                    "Min": 0,
+                    "Max": 60,
+                    "Value": 4,
+                    "Name": "MagesGuildCooldown",
+                    "Description": "Days Between Mages Guild Messages Appearing, 0 = No Delay, 60 = 60 Day Cooldown.",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                },
+				{
+                    "Min": 0,
+                    "Max": 60,
+                    "Value": 7,
+                    "Name": "PalaceCooldown",
+                    "Description": "Days Between Generic Palace Messages Appearing, 0 = No Delay, 60 = 60 Day Cooldown.",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                },
+				{
+                    "Min": 0,
+                    "Max": 60,
+                    "Value": 14,
+                    "Name": "CastleDaggerfallCooldown",
+                    "Description": "Days Between Daggerfall Castle Messages Appearing, 0 = No Delay, 60 = 60 Day Cooldown.",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                },
+				{
+                    "Min": 0,
+                    "Max": 60,
+                    "Value": 14,
+                    "Name": "CastleSentinelCooldown",
+                    "Description": "Days Between Sentinel Castle Messages Appearing, 0 = No Delay, 60 = 60 Day Cooldown.",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                },
+                {
+                    "Min": 0,
+                    "Max": 60,
+                    "Value": 14,
+                    "Name": "CastleWayrestCooldown",
+                    "Description": "Days Between Castle Wayrest Messages Appearing, 0 = No Delay, 60 = 60 Day Cooldown.",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.SliderIntKey"
+                }
+            ],
+            "$version": "v1"
+        },
+		{
+            "Name": "TestingStuff",
+            "Description": "Settings For Quickly Testing Stuff",
+            "IsAdvanced": false,
+            "Keys": [
+                {
+                    "Value": true,
+                    "Name": "TestingToggleThing",
+                    "Description": "Toggle Whether This Mod Does Anything. For Testing Only.",
+                    "$version": "v1",
+                    "$type": "DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings.ToggleKey"
+                }
+            ],
+            "$version": "v1"
+        }
+    ]
+}
