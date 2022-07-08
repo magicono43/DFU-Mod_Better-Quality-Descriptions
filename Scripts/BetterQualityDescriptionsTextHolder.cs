@@ -1,11 +1,6 @@
 using DaggerfallWorkshop.Game;
-using DaggerfallWorkshop.Game.Entity;
 using DaggerfallWorkshop;
 using DaggerfallConnect.Arena2;
-using DaggerfallConnect;
-using DaggerfallWorkshop.Game.Player;
-using DaggerfallWorkshop.Game.Utility;
-using DaggerfallWorkshop.Utility;
 
 namespace BetterQualityDescriptions
 {
@@ -30,180 +25,64 @@ namespace BetterQualityDescriptions
             return GameManager.Instance.PlayerGPS.CurrentRegion.Name;
         }
 
-        public static string RegentName()
-        {   // %rn
-            // Look for a defined ruler for the region.
-            PlayerGPS gps = GameManager.Instance.PlayerGPS;
-            PersistentFactionData factionData = GameManager.Instance.PlayerEntity.FactionData;
-            FactionFile.FactionData regionFaction;
-            if (factionData.FindFactionByTypeAndRegion((int)FactionFile.FactionTypes.Province, gps.CurrentRegionIndex, out regionFaction))
-            {
-                FactionFile.FactionData child;
-                foreach (int childID in regionFaction.children)
-                    if (factionData.GetFactionData(childID, out child) && child.type == (int)FactionFile.FactionTypes.Individual)
-                        return child.name;
-            }
-            // Use a random name if no defined individual ruler.
-            return GetRandomFullName();
-        }
-
-        public static string GetRandomFullName()
-        {
-            // Get appropriate nameBankType for this region and a random gender
-            NameHelper.BankTypes nameBankType = NameHelper.BankTypes.Breton;
-            if (GameManager.Instance.PlayerGPS.CurrentRegionIndex > -1)
-                nameBankType = (NameHelper.BankTypes)MapsFile.RegionRaces[GameManager.Instance.PlayerGPS.CurrentRegionIndex];
-            Genders gender = (DFRandom.random_range_inclusive(0, 1) == 1) ? Genders.Female : Genders.Male;
-
-            return DaggerfallUnity.Instance.NameHelper.FullName(nameBankType, gender);
-        }
-
-        public static string RegentTitle()
-        {   // %rt %t
-            PlayerGPS gps = GameManager.Instance.PlayerGPS;
-            FactionFile.FactionData regionFaction;
-            GameManager.Instance.PlayerEntity.FactionData.FindFactionByTypeAndRegion((int)FactionFile.FactionTypes.Province, gps.CurrentRegionIndex, out regionFaction);
-            return GetRulerTitle(regionFaction.ruler);
-        }
-
-        private static string GetRulerTitle(int factionRuler)
-        {
-            switch (factionRuler)
-            {
-                case 1:
-                    return TextManager.Instance.GetLocalizedText("King");
-                case 2:
-                    return TextManager.Instance.GetLocalizedText("Queen");
-                case 3:
-                    return TextManager.Instance.GetLocalizedText("Duke");
-                case 4:
-                    return TextManager.Instance.GetLocalizedText("Duchess");
-                case 5:
-                    return TextManager.Instance.GetLocalizedText("Marquis");
-                case 6:
-                    return TextManager.Instance.GetLocalizedText("Marquise");
-                case 7:
-                    return TextManager.Instance.GetLocalizedText("Count");
-                case 8:
-                    return TextManager.Instance.GetLocalizedText("Countess");
-                case 9:
-                    return TextManager.Instance.GetLocalizedText("Baron");
-                case 10:
-                    return TextManager.Instance.GetLocalizedText("Baroness");
-                case 11:
-                    return TextManager.Instance.GetLocalizedText("Lord");
-                case 12:
-                    return TextManager.Instance.GetLocalizedText("Lady");
-                default:
-                    return TextManager.Instance.GetLocalizedText("Lord");
-            }
-        }
-
-        public static string RemoteTown()
-        {   // Replaces __City__
-            int maxAttemptsBeforeFailure = 500;
-
-            // Get player region
-            int regionIndex = GameManager.Instance.PlayerGPS.CurrentRegionIndex;
-            DFRegion regionData = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetRegion(regionIndex);
-            int playerLocationIndex = GameManager.Instance.PlayerGPS.CurrentLocationIndex;
-
-            // Cannot use a region with no locations
-            // This should not happen in normal play
-            if (regionData.LocationCount == 0)
-                return "Wutville";
-
-            int attempts = 0;
-            bool found = false;
-            while (!found)
-            {
-                // Increment attempts and do some fallback
-                if (++attempts >= maxAttemptsBeforeFailure)
-                    break;
-
-                // Get a random location index
-                int locationIndex = UnityEngine.Random.Range(0, (int)regionData.LocationCount);
-
-                // Discard the current player location if selected
-                if (locationIndex == playerLocationIndex)
-                    continue;
-
-                // Discard all dungeon location types
-                if (IsDungeonType(regionData.MapTable[locationIndex].LocationType))
-                    continue;
-
-                // Only allow certain location types, in this case cities and settlements, etc.
-                if (!IsTownType(regionData.MapTable[locationIndex].LocationType))
-                    continue;
-
-                // Get location data for town
-                DFLocation location = DaggerfallUnity.Instance.ContentReader.MapFileReader.GetLocation(regionIndex, locationIndex);
-
-                return location.Name;
-            }
-
-            DFRegion dfRegion = GameManager.Instance.PlayerGPS.CurrentRegion;
-            for (int i = 0; i < dfRegion.LocationCount; i++)
-            {
-                if (GameManager.Instance.PlayerGPS.CurrentLocationIndex != i && dfRegion.MapTable[i].LocationType == DFRegion.LocationTypes.TownCity)
-                    return dfRegion.MapNames[i];
-            }
-            return GameManager.Instance.PlayerGPS.CurrentRegion.Name;
-        }
-
-        /// <summary>
-        /// Checks if location is one of the dungeon types.
-        /// </summary>
-        public static bool IsDungeonType(DFRegion.LocationTypes locationType)
-        {
-            // Consider 3 major dungeon types and 2 graveyard types as dungeons
-            // Will exclude locations with dungeons, such as Daggerfall, Wayrest, Sentinel
-            if (locationType == DFRegion.LocationTypes.DungeonKeep ||
-                locationType == DFRegion.LocationTypes.DungeonLabyrinth ||
-                locationType == DFRegion.LocationTypes.DungeonRuin ||
-                locationType == DFRegion.LocationTypes.Graveyard)
-            {
-                return true;
-            }
-            return false;
-        }
-
-        /// <summary>
-        /// Checks if location is one of the valid town types.
-        /// </summary>
-        public static bool IsTownType(DFRegion.LocationTypes locationType)
-        {
-            if (locationType == DFRegion.LocationTypes.TownCity ||
-                locationType == DFRegion.LocationTypes.TownHamlet ||
-                locationType == DFRegion.LocationTypes.TownVillage)
-            {
-                return true;
-            }
-            return false;
-        }
-
         public static string OneWordQuality(int quality)
         {
+            int variant = UnityEngine.Random.Range(0, 11);
+            string word = "Bugged";
+
             if (quality <= 3) // 01 - 03
             {
-                return "Terrible";
+                if (variant == 0) { word = "Dreadful"; }
+                else if (variant == 1) { word = "Horrendous"; }
+                else if (variant == 2) { word = "Horrible"; }
+                else if (variant == 3) { word = "Atrocious"; }
+                else if (variant == 4) { word = "Horrid"; }
+                else if (variant == 5) { word = "Awful"; }
+                else { word = "Terrible"; }
             }
             else if (quality <= 7) // 04 - 07
             {
-                return "Poor";
+                if (variant == 0) { word = "Bad"; }
+                else if (variant == 1) { word = "Reduced"; }
+                else if (variant == 2) { word = "Low"; }
+                else if (variant == 3) { word = "Inferior"; }
+                else if (variant == 4) { word = "Meager"; }
+                else if (variant == 5) { word = "Scant"; }
+                else { word = "Poor"; }
             }
             else if (quality <= 13) // 08 - 13
             {
-                return "Modest";
+                if (variant == 0) { word = "Modest"; }
+                else if (variant == 1) { word = "Medium"; }
+                else if (variant == 2) { word = "Moderate"; }
+                else if (variant == 3) { word = "Passable"; }
+                else if (variant == 4) { word = "Adequate"; }
+                else if (variant == 5) { word = "Typical"; }
+                else { word = "Average"; }
             }
             else if (quality <= 17) // 14 - 17
             {
-                return "Good";
+                if (variant == 0) { word = "Reasonable"; }
+                else if (variant == 1) { word = "Solid"; }
+                else if (variant == 2) { word = "Honorable"; }
+                else if (variant == 3) { word = "Nice"; }
+                else if (variant == 4) { word = "True"; }
+                else if (variant == 5) { word = "Worthy"; }
+                else { word = "Good"; }
             }
             else // 18 - 20
             {
-                return "Exceptional";
+                if (variant == 0) { word = "Exemplary"; }
+                else if (variant == 1) { word = "Esteemed"; }
+                else if (variant == 2) { word = "Astonishing"; }
+                else if (variant == 3) { word = "Marvelous"; }
+                else if (variant == 4) { word = "Wonderful"; }
+                else if (variant == 5) { word = "Spectacular"; }
+                else if (variant == 6) { word = "Incredible"; }
+                else { word = "Exceptional"; }
             }
+
+            return word;
         }
 
 
@@ -212,15 +91,15 @@ namespace BetterQualityDescriptions
             int variant = UnityEngine.Random.Range(0, 3);
             string raw = "";
 
-            if (NerdText)
+            if (TextComplexity == 2) // Minimal Text Setting
             {
                 raw = "Shop quality is, " + quality;
             }
-            else if (BasicText)
+            else if (TextComplexity == 1) // Basic Text Setting
             {
                 raw = "This is a shop of " + OneWordQuality(quality) + " quality.";
             }
-            else if (FancyText)
+            else // Fancy Text Setting
             {
                 if (quality <= 3) // 01 - 03
                 {
@@ -252,15 +131,15 @@ namespace BetterQualityDescriptions
             int variant = UnityEngine.Random.Range(0, 3);
             string raw = "";
 
-            if (NerdText)
+            if (TextComplexity == 2) // Minimal Text Setting
             {
                 raw = "Tavern quality is, " + quality;
             }
-            else if (BasicText)
+            else if (TextComplexity == 1) // Basic Text Setting
             {
                 raw = "This is a tavern of " + OneWordQuality(quality) + " quality.";
             }
-            else if (FancyText)
+            else // Fancy Text Setting
             {
                 if (quality <= 3) // 01 - 03
                 {
@@ -311,15 +190,15 @@ namespace BetterQualityDescriptions
             int variant = UnityEngine.Random.Range(0, 3);
             string raw = "";
 
-            if (NerdText)
+            if (TextComplexity == 2) // Minimal Text Setting
             {
                 raw = "House quality is, " + quality;
             }
-            else if (BasicText)
+            else if (TextComplexity == 1) // Basic Text Setting
             {
                 raw = "This is a House of " + OneWordQuality(quality) + " quality.";
             }
-            else if (FancyText)
+            else // Fancy Text Setting
             {
                 if (quality <= 3) // 01 - 03
                 {
@@ -354,15 +233,15 @@ namespace BetterQualityDescriptions
             int variant = UnityEngine.Random.Range(0, 3);
             string raw = "";
 
-            if (NerdText)
+            if (TextComplexity == 2) // Minimal Text Setting
             {
                 raw = "Bank quality is, " + quality;
             }
-            else if (BasicText)
+            else if (TextComplexity == 1) // Basic Text Setting
             {
                 raw = "This is a bank of " + OneWordQuality(quality) + " quality.";
             }
-            else if (FancyText)
+            else // Fancy Text Setting
             {
                 if (quality <= 3) // 01 - 03
                 {
@@ -394,15 +273,15 @@ namespace BetterQualityDescriptions
             int variant = UnityEngine.Random.Range(0, 3);
             string raw = "";
 
-            if (NerdText)
+            if (TextComplexity == 2) // Minimal Text Setting
             {
                 raw = "Library quality is, " + quality;
             }
-            else if (BasicText)
+            else if (TextComplexity == 1) // Basic Text Setting
             {
                 raw = "This is a library of " + OneWordQuality(quality) + " quality.";
             }
-            else if (FancyText)
+            else // Fancy Text Setting
             {
                 if (quality <= 3) // 01 - 03
                 {
@@ -434,15 +313,15 @@ namespace BetterQualityDescriptions
             int variant = UnityEngine.Random.Range(0, 3);
             string raw = "";
 
-            if (NerdText)
+            if (TextComplexity == 2) // Minimal Text Setting
             {
                 raw = "Temple quality is, " + quality;
             }
-            else if (BasicText)
+            else if (TextComplexity == 1) // Basic Text Setting
             {
                 raw = "This is a temple of " + OneWordQuality(quality) + " quality.";
             }
-            else if (FancyText)
+            else // Fancy Text Setting
             {
                 if (quality <= 3) // 01 - 03
                 {
@@ -474,15 +353,15 @@ namespace BetterQualityDescriptions
             int variant = UnityEngine.Random.Range(0, 3);
             string raw = "";
 
-            if (NerdText)
+            if (TextComplexity == 2) // Minimal Text Setting
             {
                 raw = "Mages guildhall quality is, " + quality;
             }
-            else if (BasicText)
+            else if (TextComplexity == 1) // Basic Text Setting
             {
                 raw = "This is a Mages guildhall of " + OneWordQuality(quality) + " quality.";
             }
-            else if (FancyText)
+            else // Fancy Text Setting
             {
                 if (quality <= 3) // 01 - 03
                 {
@@ -517,15 +396,15 @@ namespace BetterQualityDescriptions
             int variant = UnityEngine.Random.Range(0, 3);
             string raw = "";
 
-            if (NerdText)
+            if (TextComplexity == 2) // Minimal Text Setting
             {
                 raw = "Fighters guildhall quality is, " + quality;
             }
-            else if (BasicText)
+            else if (TextComplexity == 1) // Basic Text Setting
             {
                 raw = "This is a Fighters guildhall of " + OneWordQuality(quality) + " quality.";
             }
-            else if (FancyText)
+            else // Fancy Text Setting
             {
                 if (quality <= 3) // 01 - 03
                 {
@@ -560,15 +439,15 @@ namespace BetterQualityDescriptions
             int variant = UnityEngine.Random.Range(0, 3);
             string raw = "";
 
-            if (NerdText)
+            if (TextComplexity == 2) // Minimal Text Setting
             {
                 raw = "Knightly Order guildhall quality is, " + quality;
             }
-            else if (BasicText)
+            else if (TextComplexity == 1) // Basic Text Setting
             {
                 raw = "This is a Knightly Order guildhall of " + OneWordQuality(quality) + " quality.";
             }
-            else if (FancyText)
+            else // Fancy Text Setting
             {
                 if (quality <= 3) // 01 - 03
                 {
@@ -603,15 +482,15 @@ namespace BetterQualityDescriptions
             int variant = UnityEngine.Random.Range(0, 3);
             string raw = "";
 
-            if (NerdText)
+            if (TextComplexity == 2) // Minimal Text Setting
             {
                 raw = "Thieves guildhall quality is, " + quality;
             }
-            else if (BasicText)
+            else if (TextComplexity == 1) // Basic Text Setting
             {
                 raw = "This is a Thieves guildhall of " + OneWordQuality(quality) + " quality.";
             }
-            else if (FancyText)
+            else // Fancy Text Setting
             {
                 if (quality <= 3) // 01 - 03
                 {
@@ -646,15 +525,15 @@ namespace BetterQualityDescriptions
             int variant = UnityEngine.Random.Range(0, 3);
             string raw = "";
 
-            if (NerdText)
+            if (TextComplexity == 2) // Minimal Text Setting
             {
                 raw = "Dark Brotherhood guildhall quality is, " + quality;
             }
-            else if (BasicText)
+            else if (TextComplexity == 1) // Basic Text Setting
             {
                 raw = "This is a Dark Brotherhood guildhall of " + OneWordQuality(quality) + " quality.";
             }
-            else if (FancyText)
+            else // Fancy Text Setting
             {
                 if (quality <= 3) // 01 - 03
                 {
@@ -689,15 +568,15 @@ namespace BetterQualityDescriptions
             int variant = UnityEngine.Random.Range(0, 3);
             string raw = "";
 
-            if (NerdText)
+            if (TextComplexity == 2) // Minimal Text Setting
             {
                 raw = "Palace quality is, " + quality;
             }
-            else if (BasicText)
+            else if (TextComplexity == 1) // Basic Text Setting
             {
                 raw = "This is a Palace of " + OneWordQuality(quality) + " quality.";
             }
-            else if (FancyText)
+            else // Fancy Text Setting
             {
                 if (quality <= 3) // 01 - 03
                 {

@@ -5,7 +5,7 @@
     "ContactInfo": "kirkoliveri@gmail.com",
     "DFUnity_Version": "0.13.5",
     "ModDescription": "Allows Buildings Other Than Just Shops To Give Descriptive Text Based On Their Quality When Entering. Also Adds More Variants And Options For This Feature.",
-    "GUID": "aed67262-5a72-4600-98cb-3a1c7755918b",
+    "GUID": "9a3c2738-8309-44ff-9bc7-d9bee2883bdf",
     "Files": [
         "Assets/Game/Mods/DFU-Mod_Better-Quality-Descriptions/Scripts/BetterQualityDescriptionsMain.cs",
         "Assets/Game/Mods/DFU-Mod_Better-Quality-Descriptions/Scripts/BetterQualityDescriptionsTextHolder.cs",

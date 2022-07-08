@@ -3,9 +3,9 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    7/2/2022, 8:00 PM
-// Last Edit:		7/2/2022, 8:00 PM
+// Last Edit:		7/8/2022, 7:00 PM
 // Version:			1.00
-// Special Thanks:  Cliffworms, Kab the Bird Ranger, Jehuty, Ralzar, Kokytos, Hazelnut, and Interkarma
+// Special Thanks:  Cliffworms, Kab the Bird Ranger, Aaron Gimblet, Reconsile, Jehuty, Ralzar, Kokytos, Hazelnut, and Interkarma
 // Modifier:
 
 using System;
@@ -15,8 +15,6 @@ using DaggerfallWorkshop;
 using DaggerfallWorkshop.Game;
 using DaggerfallWorkshop.Game.Utility.ModSupport;
 using UnityEngine;
-using DaggerfallWorkshop.Game.Weather;
-using DaggerfallWorkshop.Utility;
 using DaggerfallWorkshop.Game.Guilds;
 using DaggerfallWorkshop.Game.Utility.ModSupport.ModSettings;
 using System.Collections.Generic;
@@ -37,29 +35,35 @@ namespace BetterQualityDescriptions
 
         // Options
         public static int TextDisplayType { get; set; }
+        public static int TextComplexity { get; set; }
         public static int MinDisplayDuration { get; set; }
         public static int MaxDisplayDuration { get; set; }
         public static int ShopTextCooldown { get; set; }
         public static int TavernTextCooldown { get; set; }
+        public static int ResidenceTextCooldown { get; set; }
+        public static int BankTextCooldown { get; set; }
+        public static int LibraryTextCooldown { get; set; }
         public static int TempleTextCooldown { get; set; }
         public static int MagesGuildTextCooldown { get; set; }
+        public static int FightersGuildTextCooldown { get; set; }
+        public static int KnightOrderTextCooldown { get; set; }
+        public static int ThievesGuildTextCooldown { get; set; }
+        public static int DarkBrotherhoodTextCooldown { get; set; }
         public static int PalaceTextCooldown { get; set; }
-        public static int CastleDFTextCooldown { get; set; }
-        public static int CastleSentTextCooldown { get; set; }
-        public static int CastleWayTextCooldown { get; set; }
-
-        // Testing Settings Toggles
-        public static bool TestingToggle { get; set; }
 
         // Attached To SaveData
         public static ulong lastSeenShopText = 0;
         public static ulong lastSeenTavernText = 0;
+        public static ulong lastSeenResidenceText = 0;
+        public static ulong lastSeenBankText = 0;
+        public static ulong lastSeenLibraryText = 0;
         public static ulong lastSeenTempleText = 0;
         public static ulong lastSeenMagesGuildText = 0;
+        public static ulong lastSeenFightersGuildText = 0;
+        public static ulong lastSeenKnightOrderText = 0;
+        public static ulong lastSeenThievesGuildText = 0;
+        public static ulong lastSeenDarkBrotherhoodText = 0;
         public static ulong lastSeenPalaceText = 0;
-        public static ulong lastSeenCastleDFText = 0;
-        public static ulong lastSeenCastleSentText = 0;
-        public static ulong lastSeenCastleWayText = 0;
 
         // Global Variables
         public static float TextDelay { get; set; }
@@ -95,18 +99,21 @@ namespace BetterQualityDescriptions
         static void LoadSettings(ModSettings modSettings, ModSettingsChange change)
         {
             TextDisplayType = mod.GetSettings().GetValue<int>("GeneralSettings", "DisplayType");
+            TextComplexity = mod.GetSettings().GetValue<int>("GeneralSettings", "ComplexityType");
             MinDisplayDuration = mod.GetSettings().GetValue<int>("GeneralSettings", "MinDisplayTime");
             MaxDisplayDuration = mod.GetSettings().GetValue<int>("GeneralSettings", "MaxDisplayTime");
-            ShopTextCooldown = mod.GetSettings().GetValue<int>("FlavorTextFrequency", "ShopCooldown");
-            TavernTextCooldown = mod.GetSettings().GetValue<int>("FlavorTextFrequency", "TavernCooldown");
-            TempleTextCooldown = mod.GetSettings().GetValue<int>("FlavorTextFrequency", "TempleCooldown");
-            MagesGuildTextCooldown = mod.GetSettings().GetValue<int>("FlavorTextFrequency", "MagesGuildCooldown");
-            PalaceTextCooldown = mod.GetSettings().GetValue<int>("FlavorTextFrequency", "PalaceCooldown");
-            CastleDFTextCooldown = mod.GetSettings().GetValue<int>("FlavorTextFrequency", "CastleDaggerfallCooldown");
-            CastleSentTextCooldown = mod.GetSettings().GetValue<int>("FlavorTextFrequency", "CastleSentinelCooldown");
-            CastleWayTextCooldown = mod.GetSettings().GetValue<int>("FlavorTextFrequency", "CastleWayrestCooldown");
-
-            TestingToggle = mod.GetSettings().GetValue<bool>("TestingStuff", "TestingToggleThing");
+            ShopTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "ShopCooldown");
+            TavernTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "TavernCooldown");
+            ResidenceTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "ResidenceCooldown");
+            BankTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "BankCooldown");
+            LibraryTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "LibraryCooldown");
+            TempleTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "TempleCooldown");
+            MagesGuildTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "MagesGuildCooldown");
+            FightersGuildTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "FightersGuildCooldown");
+            KnightOrderTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "KnightOrderCooldown");
+            ThievesGuildTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "ThievesGuildCooldown");
+            DarkBrotherhoodTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "DarkBrotherhoodCooldown");
+            PalaceTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "PalaceCooldown");
         }
 
         #endregion
@@ -119,7 +126,7 @@ namespace BetterQualityDescriptions
                 partLength = 65;
             string sentence = rawString;
             string[] words = sentence.Split(' ');
-            TextDelay = 5f + (words.Length * 0.25f);
+            TextDelay = 3f + (words.Length * 0.25f);
             var parts = new Dictionary<int, string>();
             string part = string.Empty;
             int partCounter = 0;
@@ -152,81 +159,105 @@ namespace BetterQualityDescriptions
             PlayerGPS.DiscoveredBuilding buildingData = playerEnterExit.BuildingDiscoveryData;
             int quality = buildingData.quality;
 
-            ulong currentTimeSeconds = DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.ToSeconds(); // 15 * 86400 = Number of seconds in 15 days.
+            ulong currentTimeSeconds = DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.ToSeconds(); // 15 * 60 = Number of seconds in 15 minutes.
 
             TextFile.Token[] tokens = null;
 
             if (playerEnterExit.IsPlayerInside)
             {
-                if (playerEnterExit.IsPlayerInsideOpenShop && (currentTimeSeconds - lastSeenShopText) > 86400 * (uint)ShopTextCooldown)
+                if (playerEnterExit.IsPlayerInsideOpenShop && (currentTimeSeconds - lastSeenShopText) > 60 * (uint)ShopTextCooldown)
                 {
                     lastSeenShopText = currentTimeSeconds;
+
+                    if (ShopTextCooldown >= 21) { return; }
 
                     tokens = AllShopQualityText(quality);
                 }
-                else if (playerEnterExit.IsPlayerInsideTavern && (currentTimeSeconds - lastSeenTavernText) > 86400 * (uint)TavernTextCooldown)
+                else if (playerEnterExit.IsPlayerInsideTavern && (currentTimeSeconds - lastSeenTavernText) > 60 * (uint)TavernTextCooldown)
                 {
                     lastSeenTavernText = currentTimeSeconds;
 
+                    if (TavernTextCooldown >= 21) { return; }
+
                     tokens = TavernQualityText(quality);
                 }
-                else if ((int)playerEnterExit.BuildingDiscoveryData.buildingType >= 17 && (int)playerEnterExit.BuildingDiscoveryData.buildingType < 23 && (currentTimeSeconds - lastSeenPalaceText) > 86400 * (uint)PalaceTextCooldown)
+                else if ((int)playerEnterExit.BuildingDiscoveryData.buildingType >= 17 && (int)playerEnterExit.BuildingDiscoveryData.buildingType < 23 && (currentTimeSeconds - lastSeenResidenceText) > 60 * (uint)ResidenceTextCooldown)
                 {
-                    lastSeenPalaceText = currentTimeSeconds;
+                    lastSeenResidenceText = currentTimeSeconds;
+
+                    if (ResidenceTextCooldown >= 21) { return; }
 
                     tokens = ResidenceQualityText(quality);
                 }
-                else if (buildingType == DFLocation.BuildingTypes.Bank && (currentTimeSeconds - lastSeenShopText) > 86400 * (uint)ShopTextCooldown)
+                else if (buildingType == DFLocation.BuildingTypes.Bank && (currentTimeSeconds - lastSeenBankText) > 60 * (uint)BankTextCooldown)
                 {
-                    lastSeenShopText = currentTimeSeconds;
+                    lastSeenBankText = currentTimeSeconds;
+
+                    if (BankTextCooldown >= 21) { return; }
 
                     tokens = BankQualityText(quality);
                 }
-                else if (buildingType == DFLocation.BuildingTypes.Library && (currentTimeSeconds - lastSeenShopText) > 86400 * (uint)ShopTextCooldown)
+                else if (buildingType == DFLocation.BuildingTypes.Library && (currentTimeSeconds - lastSeenLibraryText) > 60 * (uint)LibraryTextCooldown)
                 {
-                    lastSeenShopText = currentTimeSeconds;
+                    lastSeenLibraryText = currentTimeSeconds;
+
+                    if (LibraryTextCooldown >= 21) { return; }
 
                     tokens = LibraryQualityText(quality);
                 }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.Temple && (currentTimeSeconds - lastSeenTempleText) > 86400 * (uint)TempleTextCooldown)
+                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.Temple && (currentTimeSeconds - lastSeenTempleText) > 60 * (uint)TempleTextCooldown)
                 {
                     lastSeenTempleText = currentTimeSeconds;
 
+                    if (TempleTextCooldown >= 21) { return; }
+
                     tokens = TempleQualityText(quality);
                 }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Mages_Guild && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenMagesGuildText) > 86400 * (uint)MagesGuildTextCooldown)
+                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Mages_Guild && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenMagesGuildText) > 60 * (uint)MagesGuildTextCooldown)
                 {
                     lastSeenMagesGuildText = currentTimeSeconds;
+
+                    if (MagesGuildTextCooldown >= 21) { return; }
 
                     tokens = MagesGuildQualityText(quality);
                 }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Fighters_Guild && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenMagesGuildText) > 86400 * (uint)MagesGuildTextCooldown)
+                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Fighters_Guild && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenFightersGuildText) > 60 * (uint)FightersGuildTextCooldown)
                 {
-                    lastSeenMagesGuildText = currentTimeSeconds;
+                    lastSeenFightersGuildText = currentTimeSeconds;
+
+                    if (FightersGuildTextCooldown >= 21) { return; }
 
                     tokens = FightersGuildQualityText(quality);
                 }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.Generic_Knightly_Order && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenMagesGuildText) > 86400 * (uint)MagesGuildTextCooldown)
+                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.Generic_Knightly_Order && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenKnightOrderText) > 60 * (uint)KnightOrderTextCooldown)
                 {
-                    lastSeenMagesGuildText = currentTimeSeconds;
+                    lastSeenKnightOrderText = currentTimeSeconds;
+
+                    if (KnightOrderTextCooldown >= 21) { return; }
 
                     tokens = KnightOrderQualityText(quality);
                 }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Thieves_Guild && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenMagesGuildText) > 86400 * (uint)MagesGuildTextCooldown)
+                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Thieves_Guild && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenThievesGuildText) > 60 * (uint)ThievesGuildTextCooldown)
                 {
-                    lastSeenMagesGuildText = currentTimeSeconds;
+                    lastSeenThievesGuildText = currentTimeSeconds;
+
+                    if (ThievesGuildTextCooldown >= 21) { return; }
 
                     tokens = ThievesGuildQualityText(quality);
                 }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Dark_Brotherhood && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenMagesGuildText) > 86400 * (uint)MagesGuildTextCooldown)
+                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Dark_Brotherhood && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenDarkBrotherhoodText) > 60 * (uint)DarkBrotherhoodTextCooldown)
                 {
-                    lastSeenMagesGuildText = currentTimeSeconds;
+                    lastSeenDarkBrotherhoodText = currentTimeSeconds;
+
+                    if (DarkBrotherhoodTextCooldown >= 21) { return; }
 
                     tokens = DarkBrotherhoodQualityText(quality);
                 }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.Palace && (currentTimeSeconds - lastSeenPalaceText) > 86400 * (uint)PalaceTextCooldown) // Perhaps for places where breaking in is a thing that might be done/worth doing, add another set of text for breaking in compared to normally just going in to emphasize the wealth/value of the house etc.
+                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.Palace && (currentTimeSeconds - lastSeenPalaceText) > 60 * (uint)PalaceTextCooldown) // Perhaps for places where breaking in is a thing that might be done/worth doing, add another set of text for breaking in compared to normally just going in to emphasize the wealth/value of the house etc.
                 {
                     lastSeenPalaceText = currentTimeSeconds;
+
+                    if (PalaceTextCooldown >= 21) { return; }
 
                     tokens = PalaceQualityText(quality);
                 }
@@ -286,86 +317,84 @@ namespace BetterQualityDescriptions
                 return true;
         }
 
-        public WeatherType GetCurrentWeatherType()
-        {
-            WeatherManager weatherManager = GameManager.Instance.WeatherManager;
-
-            if (weatherManager.IsSnowing)
-                return WeatherType.Snow;
-            else if (weatherManager.IsStorming)
-                return WeatherType.Thunder;
-            else if (weatherManager.IsRaining)
-                return WeatherType.Rain;
-            else if (weatherManager.IsOvercast && weatherManager.currentOutdoorFogSettings.density == weatherManager.HeavyFogSettings.density)
-                return WeatherType.Fog;
-            else if (weatherManager.IsOvercast)
-                return WeatherType.Overcast;
-            else
-                return WeatherType.Sunny;
-        }
-
         #region SaveData Junk
 
         public Type SaveDataType
         {
-            get { return typeof(ArenaStyleFlavorTextSaveData); }
+            get { return typeof(BetterQualityDescriptionsSaveData); }
         }
 
         public object NewSaveData()
         {
-            return new ArenaStyleFlavorTextSaveData
+            return new BetterQualityDescriptionsSaveData
             {
                 LastSeenShopText = 0,
                 LastSeenTavernText = 0,
+                LastSeenResidenceText = 0,
+                LastSeenBankText = 0,
+                LastSeenLibraryText = 0,
                 LastSeenTempleText = 0,
                 LastSeenMagesGuildText = 0,
+                LastSeenFightersGuildText = 0,
+                LastSeenKnightOrderText = 0,
+                LastSeenThievesGuildText = 0,
+                LastSeenDarkBrotherhoodText = 0,
                 LastSeenPalaceText = 0,
-                LastSeenCastleDFText = 0,
-                LastSeenCastleSentText = 0,
-                LastSeenCastleWayText = 0
             };
         }
 
         public object GetSaveData()
         {
-            return new ArenaStyleFlavorTextSaveData
+            return new BetterQualityDescriptionsSaveData
             {
                 LastSeenShopText = lastSeenShopText,
                 LastSeenTavernText = lastSeenTavernText,
+                LastSeenResidenceText = lastSeenResidenceText,
+                LastSeenBankText = lastSeenBankText,
+                LastSeenLibraryText = lastSeenLibraryText,
                 LastSeenTempleText = lastSeenTempleText,
                 LastSeenMagesGuildText = lastSeenMagesGuildText,
+                LastSeenFightersGuildText = lastSeenFightersGuildText,
+                LastSeenKnightOrderText = lastSeenKnightOrderText,
+                LastSeenThievesGuildText = lastSeenThievesGuildText,
+                LastSeenDarkBrotherhoodText = lastSeenDarkBrotherhoodText,
                 LastSeenPalaceText = lastSeenPalaceText,
-                LastSeenCastleDFText = lastSeenCastleDFText,
-                LastSeenCastleSentText = lastSeenCastleSentText,
-                LastSeenCastleWayText = lastSeenCastleWayText
             };
         }
 
         public void RestoreSaveData(object saveData)
         {
-            var arenaStyleFlavorTextSaveData = (ArenaStyleFlavorTextSaveData)saveData;
-            lastSeenShopText = arenaStyleFlavorTextSaveData.LastSeenShopText;
-            lastSeenTavernText = arenaStyleFlavorTextSaveData.LastSeenTavernText;
-            lastSeenTempleText = arenaStyleFlavorTextSaveData.LastSeenTempleText;
-            lastSeenMagesGuildText = arenaStyleFlavorTextSaveData.LastSeenMagesGuildText;
-            lastSeenPalaceText = arenaStyleFlavorTextSaveData.LastSeenPalaceText;
-            lastSeenCastleDFText = arenaStyleFlavorTextSaveData.LastSeenCastleDFText;
-            lastSeenCastleSentText = arenaStyleFlavorTextSaveData.LastSeenCastleSentText;
-            lastSeenCastleWayText = arenaStyleFlavorTextSaveData.LastSeenCastleWayText;
+            var BetterQualityDescriptionsSaveData = (BetterQualityDescriptionsSaveData)saveData;
+            lastSeenShopText = BetterQualityDescriptionsSaveData.LastSeenShopText;
+            lastSeenTavernText = BetterQualityDescriptionsSaveData.LastSeenTavernText;
+            lastSeenResidenceText = BetterQualityDescriptionsSaveData.LastSeenResidenceText;
+            lastSeenBankText = BetterQualityDescriptionsSaveData.LastSeenBankText;
+            lastSeenLibraryText = BetterQualityDescriptionsSaveData.LastSeenLibraryText;
+            lastSeenTempleText = BetterQualityDescriptionsSaveData.LastSeenTempleText;
+            lastSeenMagesGuildText = BetterQualityDescriptionsSaveData.LastSeenMagesGuildText;
+            lastSeenFightersGuildText = BetterQualityDescriptionsSaveData.LastSeenFightersGuildText;
+            lastSeenKnightOrderText = BetterQualityDescriptionsSaveData.LastSeenKnightOrderText;
+            lastSeenThievesGuildText = BetterQualityDescriptionsSaveData.LastSeenThievesGuildText;
+            lastSeenDarkBrotherhoodText = BetterQualityDescriptionsSaveData.LastSeenDarkBrotherhoodText;
+            lastSeenPalaceText = BetterQualityDescriptionsSaveData.LastSeenPalaceText;
         }
     }
 
     [FullSerializer.fsObject("v1")]
-    public class ArenaStyleFlavorTextSaveData
+    public class BetterQualityDescriptionsSaveData
     {
         public ulong LastSeenShopText;
         public ulong LastSeenTavernText;
+        public ulong LastSeenResidenceText;
+        public ulong LastSeenBankText;
+        public ulong LastSeenLibraryText;
         public ulong LastSeenTempleText;
         public ulong LastSeenMagesGuildText;
+        public ulong LastSeenFightersGuildText;
+        public ulong LastSeenKnightOrderText;
+        public ulong LastSeenThievesGuildText;
+        public ulong LastSeenDarkBrotherhoodText;
         public ulong LastSeenPalaceText;
-        public ulong LastSeenCastleDFText;
-        public ulong LastSeenCastleSentText;
-        public ulong LastSeenCastleWayText;
     }
 
     #endregion
