@@ -3,7 +3,7 @@
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    7/2/2022, 8:00 PM
-// Last Edit:		7/8/2022, 7:00 PM
+// Last Edit:		7/8/2022, 9:45 PM
 // Version:			1.00
 // Special Thanks:  Cliffworms, Kab the Bird Ranger, Aaron Gimblet, Reconsile, Jehuty, Ralzar, Kokytos, Hazelnut, and Interkarma
 // Modifier:
@@ -229,7 +229,7 @@ namespace BetterQualityDescriptions
 
                     tokens = FightersGuildQualityText(quality);
                 }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.Generic_Knightly_Order && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenKnightOrderText) > 60 * (uint)KnightOrderTextCooldown)
+                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && OwnedByKnightlyOrder() && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenKnightOrderText) > 60 * (uint)KnightOrderTextCooldown)
                 {
                     lastSeenKnightOrderText = currentTimeSeconds;
 
@@ -315,6 +315,26 @@ namespace BetterQualityDescriptions
                 return hour < 6 || hour > 18 ? false : true;
             else
                 return true;
+        }
+
+        public bool OwnedByKnightlyOrder()
+        {
+            switch (playerEnterExit.BuildingDiscoveryData.factionID)
+            {
+                case (int)FactionFile.FactionIDs.The_Host_of_the_Horn:
+                case (int)FactionFile.FactionIDs.The_Knights_of_the_Dragon:
+                case (int)FactionFile.FactionIDs.The_Knights_of_the_Flame:
+                case (int)FactionFile.FactionIDs.The_Knights_of_the_Hawk:
+                case (int)FactionFile.FactionIDs.The_Knights_of_the_Owl:
+                case (int)FactionFile.FactionIDs.The_Knights_of_the_Rose:
+                case (int)FactionFile.FactionIDs.The_Knights_of_the_Wheel:
+                case (int)FactionFile.FactionIDs.The_Order_of_the_Candle:
+                case (int)FactionFile.FactionIDs.The_Order_of_the_Raven:
+                case (int)FactionFile.FactionIDs.The_Order_of_the_Scarab:
+                    return true;
+                default:
+                    return false;
+            }
         }
 
         #region SaveData Junk
