@@ -1,10 +1,10 @@
 // Project:         BetterQualityDescriptions mod for Daggerfall Unity (http://www.dfworkshop.net)
-// Copyright:       Copyright (C) 2022 Kirk.O
+// Copyright:       Copyright (C) 2024 Kirk.O
 // License:         MIT License (http://www.opensource.org/licenses/mit-license.php)
 // Author:          Kirk.O
 // Created On: 	    7/2/2022, 8:00 PM
-// Last Edit:		7/8/2022, 9:45 PM
-// Version:			1.00
+// Last Edit:		4/14/2024, 11:00 PM
+// Version:			1.01
 // Special Thanks:  Cliffworms, Kab the Bird Ranger, Aaron Gimblet, Reconsile, Jehuty, Ralzar, Kokytos, Hazelnut, and Interkarma
 // Modifier:
 
@@ -24,12 +24,7 @@ namespace BetterQualityDescriptions
 {
     public partial class BetterQualityDescriptionsMain : MonoBehaviour, IHasModSaveData
     {
-        static BetterQualityDescriptionsMain instance;
-
-        public static BetterQualityDescriptionsMain Instance
-        {
-            get { return instance ?? (instance = FindObjectOfType<BetterQualityDescriptionsMain>()); }
-        }
+        public static BetterQualityDescriptionsMain Instance;
 
         static Mod mod;
 
@@ -38,6 +33,7 @@ namespace BetterQualityDescriptions
         public static int TextComplexity { get; set; }
         public static int MinDisplayDuration { get; set; }
         public static int MaxDisplayDuration { get; set; }
+
         public static int ShopTextCooldown { get; set; }
         public static int TavernTextCooldown { get; set; }
         public static int ResidenceTextCooldown { get; set; }
@@ -69,14 +65,15 @@ namespace BetterQualityDescriptions
         public static float TextDelay { get; set; }
 
         PlayerEnterExit playerEnterExit = GameManager.Instance.PlayerEnterExit;
-        PlayerGPS playerGPS = GameManager.Instance.PlayerGPS;
 
         [Invoke(StateManager.StateTypes.Start, 0)]
         public static void Init(InitParams initParams)
         {
             mod = initParams.Mod;
-            instance = new GameObject("BetterQualityDescriptions").AddComponent<BetterQualityDescriptionsMain>(); // Add script to the scene.
-            mod.SaveDataInterface = instance;
+            var go = new GameObject(mod.Title);
+            go.AddComponent<BetterQualityDescriptionsMain>(); // Add script to the scene.
+
+            mod.SaveDataInterface = Instance;
 
             mod.LoadSettingsCallback = LoadSettings; // To enable use of the "live settings changes" feature in-game.
 
@@ -86,6 +83,8 @@ namespace BetterQualityDescriptions
         private void Start()
         {
             Debug.Log("Begin mod init: Better Quality Descriptions");
+
+            Instance = this;
 
             mod.LoadSettings();
 
@@ -102,6 +101,7 @@ namespace BetterQualityDescriptions
             TextComplexity = mod.GetSettings().GetValue<int>("GeneralSettings", "ComplexityType");
             MinDisplayDuration = mod.GetSettings().GetValue<int>("GeneralSettings", "MinDisplayTime");
             MaxDisplayDuration = mod.GetSettings().GetValue<int>("GeneralSettings", "MaxDisplayTime");
+
             ShopTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "ShopCooldown");
             TavernTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "TavernCooldown");
             ResidenceTextCooldown = mod.GetSettings().GetValue<int>("QualityTextFrequency", "ResidenceCooldown");
@@ -155,133 +155,153 @@ namespace BetterQualityDescriptions
 
         public void ShowQualityText_OnTransitionInterior(PlayerEnterExit.TransitionEventArgs args)
         {
-            DFLocation.BuildingTypes buildingType = playerEnterExit.BuildingDiscoveryData.buildingType;
-            PlayerGPS.DiscoveredBuilding buildingData = playerEnterExit.BuildingDiscoveryData;
-            int quality = buildingData.quality;
-
-            ulong currentTimeSeconds = DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.ToSeconds(); // 15 * 60 = Number of seconds in 15 minutes.
-
-            TextFile.Token[] tokens = null;
-
-            if (playerEnterExit.IsPlayerInside)
+            try
             {
-                if (playerEnterExit.IsPlayerInsideOpenShop && (currentTimeSeconds - lastSeenShopText) > 60 * (uint)ShopTextCooldown)
+                DFLocation.BuildingTypes buildingType = playerEnterExit.BuildingDiscoveryData.buildingType;
+                PlayerGPS.DiscoveredBuilding buildingData = playerEnterExit.BuildingDiscoveryData;
+                IGuild guild = GameManager.Instance.GuildManager.GetGuild(buildingData.factionID);
+                bool isMemberOfBuildingGuild = false;
+                int quality = buildingData.quality;
+
+                if (buildingData.factionID != 0)
                 {
-                    lastSeenShopText = currentTimeSeconds;
-
-                    if (ShopTextCooldown >= 21) { return; }
-
-                    tokens = AllShopQualityText(quality);
+                    if (guild != null)
+                    {
+                        isMemberOfBuildingGuild = guild.IsMember();
+                    }
                 }
-                else if (playerEnterExit.IsPlayerInsideTavern && (currentTimeSeconds - lastSeenTavernText) > 60 * (uint)TavernTextCooldown)
+
+                ulong currentTimeSeconds = DaggerfallUnity.Instance.WorldTime.DaggerfallDateTime.ToSeconds(); // 15 * 60 = Number of seconds in 15 minutes.
+
+                TextFile.Token[] tokens = null;
+
+                if (playerEnterExit.IsPlayerInside)
                 {
-                    lastSeenTavernText = currentTimeSeconds;
+                    if (playerEnterExit.IsPlayerInsideOpenShop && (currentTimeSeconds - lastSeenShopText) > 60 * (uint)ShopTextCooldown)
+                    {
+                        lastSeenShopText = currentTimeSeconds;
 
-                    if (TavernTextCooldown >= 21) { return; }
+                        if (ShopTextCooldown >= 21) { return; }
 
-                    tokens = TavernQualityText(quality);
+                        tokens = AllShopQualityText(quality);
+                    }
+                    else if (playerEnterExit.IsPlayerInsideTavern && (currentTimeSeconds - lastSeenTavernText) > 60 * (uint)TavernTextCooldown)
+                    {
+                        lastSeenTavernText = currentTimeSeconds;
+
+                        if (TavernTextCooldown >= 21) { return; }
+
+                        tokens = TavernQualityText(quality);
+                    }
+                    else if ((int)playerEnterExit.BuildingDiscoveryData.buildingType >= 17 && (int)playerEnterExit.BuildingDiscoveryData.buildingType < 23)
+                    {
+                        if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.House2 && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Thieves_Guild && isMemberOfBuildingGuild && (currentTimeSeconds - lastSeenThievesGuildText) > 60 * (uint)ThievesGuildTextCooldown)
+                        {
+                            lastSeenThievesGuildText = currentTimeSeconds;
+
+                            if (ThievesGuildTextCooldown >= 21) { return; }
+
+                            tokens = ThievesGuildQualityText(quality);
+                        }
+                        else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.House2 && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Dark_Brotherhood && isMemberOfBuildingGuild && (currentTimeSeconds - lastSeenDarkBrotherhoodText) > 60 * (uint)DarkBrotherhoodTextCooldown)
+                        {
+                            lastSeenDarkBrotherhoodText = currentTimeSeconds;
+
+                            if (DarkBrotherhoodTextCooldown >= 21) { return; }
+
+                            tokens = DarkBrotherhoodQualityText(quality);
+                        }
+                        else if ((currentTimeSeconds - lastSeenResidenceText) > 60 * (uint)ResidenceTextCooldown)
+                        {
+                            lastSeenResidenceText = currentTimeSeconds;
+
+                            if (ResidenceTextCooldown >= 21) { return; }
+
+                            tokens = ResidenceQualityText(quality);
+                        }
+                    }
+                    else if (buildingType == DFLocation.BuildingTypes.Bank && (currentTimeSeconds - lastSeenBankText) > 60 * (uint)BankTextCooldown)
+                    {
+                        lastSeenBankText = currentTimeSeconds;
+
+                        if (BankTextCooldown >= 21) { return; }
+
+                        tokens = BankQualityText(quality);
+                    }
+                    else if (buildingType == DFLocation.BuildingTypes.Library && (currentTimeSeconds - lastSeenLibraryText) > 60 * (uint)LibraryTextCooldown)
+                    {
+                        lastSeenLibraryText = currentTimeSeconds;
+
+                        if (LibraryTextCooldown >= 21) { return; }
+
+                        tokens = LibraryQualityText(quality);
+                    }
+                    else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.Temple && (currentTimeSeconds - lastSeenTempleText) > 60 * (uint)TempleTextCooldown)
+                    {
+                        lastSeenTempleText = currentTimeSeconds;
+
+                        if (TempleTextCooldown >= 21) { return; }
+
+                        tokens = TempleQualityText(quality);
+                    }
+                    else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Mages_Guild && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenMagesGuildText) > 60 * (uint)MagesGuildTextCooldown)
+                    {
+                        lastSeenMagesGuildText = currentTimeSeconds;
+
+                        if (MagesGuildTextCooldown >= 21) { return; }
+
+                        tokens = MagesGuildQualityText(quality);
+                    }
+                    else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Fighters_Guild && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenFightersGuildText) > 60 * (uint)FightersGuildTextCooldown)
+                    {
+                        lastSeenFightersGuildText = currentTimeSeconds;
+
+                        if (FightersGuildTextCooldown >= 21) { return; }
+
+                        tokens = FightersGuildQualityText(quality);
+                    }
+                    else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && OwnedByKnightlyOrder() && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenKnightOrderText) > 60 * (uint)KnightOrderTextCooldown)
+                    {
+                        lastSeenKnightOrderText = currentTimeSeconds;
+
+                        if (KnightOrderTextCooldown >= 21) { return; }
+
+                        tokens = KnightOrderQualityText(quality);
+                    }
+                    else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.Palace && (currentTimeSeconds - lastSeenPalaceText) > 60 * (uint)PalaceTextCooldown) // Perhaps for places where breaking in is a thing that might be done/worth doing, add another set of text for breaking in compared to normally just going in to emphasize the wealth/value of the house etc.
+                    {
+                        lastSeenPalaceText = currentTimeSeconds;
+
+                        if (PalaceTextCooldown >= 21) { return; }
+
+                        tokens = PalaceQualityText(quality);
+                    }
                 }
-                else if ((int)playerEnterExit.BuildingDiscoveryData.buildingType >= 17 && (int)playerEnterExit.BuildingDiscoveryData.buildingType < 23 && (currentTimeSeconds - lastSeenResidenceText) > 60 * (uint)ResidenceTextCooldown)
+
+                if (tokens != null)
                 {
-                    lastSeenResidenceText = currentTimeSeconds;
+                    if (MinDisplayDuration != 0 && TextDelay < MinDisplayDuration) // If not set to 0, the minimum number of seconds a message can show for
+                        TextDelay = MinDisplayDuration;
 
-                    if (ResidenceTextCooldown >= 21) { return; }
+                    if (MaxDisplayDuration != 0 && TextDelay > MaxDisplayDuration) // If not set to 0, the maximum number of seconds a message can show for
+                        TextDelay = MaxDisplayDuration;
 
-                    tokens = ResidenceQualityText(quality);
-                }
-                else if (buildingType == DFLocation.BuildingTypes.Bank && (currentTimeSeconds - lastSeenBankText) > 60 * (uint)BankTextCooldown)
-                {
-                    lastSeenBankText = currentTimeSeconds;
-
-                    if (BankTextCooldown >= 21) { return; }
-
-                    tokens = BankQualityText(quality);
-                }
-                else if (buildingType == DFLocation.BuildingTypes.Library && (currentTimeSeconds - lastSeenLibraryText) > 60 * (uint)LibraryTextCooldown)
-                {
-                    lastSeenLibraryText = currentTimeSeconds;
-
-                    if (LibraryTextCooldown >= 21) { return; }
-
-                    tokens = LibraryQualityText(quality);
-                }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.Temple && (currentTimeSeconds - lastSeenTempleText) > 60 * (uint)TempleTextCooldown)
-                {
-                    lastSeenTempleText = currentTimeSeconds;
-
-                    if (TempleTextCooldown >= 21) { return; }
-
-                    tokens = TempleQualityText(quality);
-                }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Mages_Guild && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenMagesGuildText) > 60 * (uint)MagesGuildTextCooldown)
-                {
-                    lastSeenMagesGuildText = currentTimeSeconds;
-
-                    if (MagesGuildTextCooldown >= 21) { return; }
-
-                    tokens = MagesGuildQualityText(quality);
-                }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Fighters_Guild && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenFightersGuildText) > 60 * (uint)FightersGuildTextCooldown)
-                {
-                    lastSeenFightersGuildText = currentTimeSeconds;
-
-                    if (FightersGuildTextCooldown >= 21) { return; }
-
-                    tokens = FightersGuildQualityText(quality);
-                }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && OwnedByKnightlyOrder() && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenKnightOrderText) > 60 * (uint)KnightOrderTextCooldown)
-                {
-                    lastSeenKnightOrderText = currentTimeSeconds;
-
-                    if (KnightOrderTextCooldown >= 21) { return; }
-
-                    tokens = KnightOrderQualityText(quality);
-                }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Thieves_Guild && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenThievesGuildText) > 60 * (uint)ThievesGuildTextCooldown)
-                {
-                    lastSeenThievesGuildText = currentTimeSeconds;
-
-                    if (ThievesGuildTextCooldown >= 21) { return; }
-
-                    tokens = ThievesGuildQualityText(quality);
-                }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.GuildHall && playerEnterExit.BuildingDiscoveryData.factionID == (int)FactionFile.FactionIDs.The_Dark_Brotherhood && BuildingOpenCheck(buildingType, buildingData) && (currentTimeSeconds - lastSeenDarkBrotherhoodText) > 60 * (uint)DarkBrotherhoodTextCooldown)
-                {
-                    lastSeenDarkBrotherhoodText = currentTimeSeconds;
-
-                    if (DarkBrotherhoodTextCooldown >= 21) { return; }
-
-                    tokens = DarkBrotherhoodQualityText(quality);
-                }
-                else if (playerEnterExit.BuildingDiscoveryData.buildingType == DFLocation.BuildingTypes.Palace && (currentTimeSeconds - lastSeenPalaceText) > 60 * (uint)PalaceTextCooldown) // Perhaps for places where breaking in is a thing that might be done/worth doing, add another set of text for breaking in compared to normally just going in to emphasize the wealth/value of the house etc.
-                {
-                    lastSeenPalaceText = currentTimeSeconds;
-
-                    if (PalaceTextCooldown >= 21) { return; }
-
-                    tokens = PalaceQualityText(quality);
+                    if (TextDisplayType == 0) // For HUD display of text
+                    {
+                        DaggerfallUI.AddHUDText(tokens, TextDelay);
+                    }
+                    else // For MessageBox display of text
+                    {
+                        DaggerfallMessageBox textBox = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
+                        textBox.SetTextTokens(tokens);
+                        textBox.ClickAnywhereToClose = true;
+                        textBox.Show();
+                    }
                 }
             }
-
-            if (tokens != null)
+            catch (Exception e)
             {
-                if (MinDisplayDuration != 0 && TextDelay < MinDisplayDuration) // If not set to 0, the minimum number of seconds a message can show for
-                    TextDelay = MinDisplayDuration;
-
-                if (MaxDisplayDuration != 0 && TextDelay > MaxDisplayDuration) // If not set to 0, the maximum number of seconds a message can show for
-                    TextDelay = MaxDisplayDuration;
-
-                if (TextDisplayType == 0) // For HUD display of text
-                {
-                    DaggerfallUI.AddHUDText(tokens, TextDelay);
-                }
-                else // For MessageBox display of text
-                {
-                    DaggerfallMessageBox textBox = new DaggerfallMessageBox(DaggerfallUI.UIManager, DaggerfallUI.UIManager.TopWindow);
-                    textBox.SetTextTokens(tokens);
-                    textBox.ClickAnywhereToClose = true;
-                    textBox.Show();
-                }
+                Debug.LogError("[ERROR] Better Quality Descriptions: Exception has occured while transitioning into an interior: " + e.ToString());
             }
         }
 

@@ -249,7 +249,7 @@ namespace BetterQualityDescriptions
                 }
                 else if (quality <= 7) // 04 - 07
                 {
-                    raw = "You can tell a modest effort was made to hide the peeling and stained wallpaper. But the creaky and unlevel furnishings are a dead giveaway that this financial establishment is not the best " + CurrentRegion() + "has to show for itself.";
+                    raw = "You can tell a modest effort was made to hide the peeling and stained wallpaper. But the creaky and unlevel furnishings are a dead giveaway that this financial establishment is not the best " + CurrentRegion() + " has to show for itself.";
                 }
                 else if (quality <= 13) // 08 - 13
                 {
